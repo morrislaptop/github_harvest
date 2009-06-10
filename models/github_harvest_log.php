@@ -30,6 +30,7 @@ class GithubHarvestLog extends AppModel
 				'login' => $github['username'],
 				'token' => $github['token']
 			);
+			$params = array_filter($params);
 			$url .= '?' . http_build_query($params);
 			$json = file_get_contents($url);
 			$commits = json_decode($json);
@@ -102,6 +103,7 @@ class GithubHarvestLog extends AppModel
 			'login' => $username,
 			'token' => $token
 		);
+		$params = array_filter($params);
 		$url .= '?' . http_build_query($params);
 		$json = file_get_contents($url);
 		$json = json_decode($json);
