@@ -4,27 +4,39 @@ class GithubHarvestLogsController extends AppController
 	var $name = 'GithubHarvestLogs';
 	var $uses = array('UserBridge', 'GithubHarvest.GithubHarvestLog');
 	var $helpers = array('Advform.Advform');
-	
+
 	function beforeFilter() {
 		parent::beforeFilter();
 		$this->Auth->allow('sync');
 	}
-	
+
 	function sync()
 	{
 		$this->GithubHarvestLog->sync();
 	}
-	
+
 	function view_log($user_bridge_id)
 	{
+		// get the user bridge.
+		$this->UserBridge->contain();
+		$user_bridge = $this->UserBridge->read(null, $user_bridge_id);
+		$user_bridge['GitHub'] = unserialize($user_bridge['UserBridge']['app1data']);
+		$user_bridge['Harvest'] = unserialize($user_bridge['UserBridge']['app2data']);
+
+		// get logs
 		$conditions = compact('user_bridge_id');
-		$this->paginate['order'] = 'created DESC';
+		$this->paginate['order'] = 'GithubHarvestLog.created DESC';
+		$this->paginate['contain'] = array();
 		$logs = $this->paginate('GithubHarvestLog', $conditions);
+
+		// add Time helper for friendliness
 		$this->helpers[] = 'Time';
-		$this->set(compact('logs'));
+
+		// render
+		$this->set(compact('logs', 'user_bridge'));
 	}
-	
-	function configure($user_bridge_id) 
+
+	function configure($user_bridge_id)
 	{
 		if ( !empty($this->data) ) {
 			$data = array(
@@ -41,21 +53,21 @@ class GithubHarvestLogsController extends AppController
 				$this->Session->setFlash('Error saving configuration');
 			}
 		}
-		
+
 		// Get details.
 		$this->UserBridge->contain();
 		$user_bridge = $this->UserBridge->read(null, $user_bridge_id);
 		$user_bridge['Github'] = unserialize($user_bridge['UserBridge']['app1data']);
 		$user_bridge['Harvest'] = unserialize($user_bridge['UserBridge']['app2data']);
-		
+
 		// Set defaults.
 		if ( empty($this->data) ) {
 			$this->data = $user_bridge;
 		}
-		
+
 		$this->_setFormData($user_bridge);
 	}
-	
+
 	function _setFormData($user_bridge) {
 		$github_projects = array();
 		if ( $user_bridge['Github'] ) {
@@ -69,14 +81,14 @@ class GithubHarvestLogsController extends AppController
 		}
 		$this->set(compact('harvest_projects', 'github_projects', 'tasks'));
 	}
-	
+
 	function github_projects() {
 		$username = $this->params['url']['username'];
 		$token = $this->params['url']['token'];
 		$projects = $this->GithubHarvestLog->getGithubProjects($username, $token);
 		$this->set(compact('projects'));
 	}
-	
+
 	function harvest_projects_tasks() {
 		$domain = $this->params['url']['domain'];
 		$email = $this->params['url']['email'];

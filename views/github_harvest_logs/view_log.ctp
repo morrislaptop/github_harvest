@@ -16,13 +16,22 @@ echo $paginator->counter(array(
 		$odd = true;
 		foreach ($logs as $log)
 		{
+			$log['GitHub'] = unserialize($log['GithubHarvestLog']['app1data']);
+			$log['Harvest'] = unserialize($log['GithubHarvestLog']['app2data']);
 			?>
 			<tr class="<?php echo $odd ? 'odd' : 'even'; ?>">
 				<td class="rowLeft">
-					<?php echo $log['GithubHarvestLog']['commit_id']; ?>
+					<?php
+						$url = 'http://github.com/' . $userBridge['GitHub']['username'] . '/' . $userBridge['GitHub']['github_project'] . '/commit/' . $log['GithubHarvestLog']['app1_id'];
+						echo $html->link($log['GithubHarvestLog']['app1_id'], $url, array('target' => '_blank'));
+					?>
 				</td>
 				<td>
-					<?php echo $log['GithubHarvestLog']['entry_id']; ?>
+					<?php
+						$timestamp = strtotime($log['GitHub']->committed_date);
+						$url = 'http://' . $userBridge['Harvest']['domain'] . '.harvestapp.com/daily/' . (date('z', $timestamp) + 1) . '/' . date('Y', $timestamp);
+						echo $html->link($log['GithubHarvestLog']['app2_id'], $url, array('target' => '_blank'));
+					?>
 				</td>
 				<td class="rowRight">
 					<?php echo $time->nice($log['GithubHarvestLog']['created']); ?>
