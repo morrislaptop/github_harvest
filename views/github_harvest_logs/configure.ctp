@@ -1,6 +1,7 @@
 <?php
 	echo $html->css('forms', false, false, false);
 	echo $javascript->link('jquery.selectboxes', false);
+
 	echo $javascript->codeBlock('
 		$(function() {
 			$("#GithubToken").change(loadGithubProjects);	
@@ -22,7 +23,7 @@
 			};
 			
 			$("#GithubGithubProject").html("<option>loading...</option>");
-			$("#GithubGithubProject").ajaxAddOption("' . $html->url(array('action' => 'github_projects', 'ext' => 'json')) . '", data);
+			$("#GithubGithubProject").ajaxAddOption("' . $html->url(array('action' => 'github_projects', 'ext' => 'json', $this->data['UserBridge']['id'])) . '", data);
 		}
 		
 		function loadHarvestProjectsAndTasks() {
@@ -34,9 +35,9 @@
 			
 			$("#HarvestHarvestProject").html("<option>loading...</option>");
 			$("#HarvestTask").html("<option>loading...</option>");
-			$.getJSON("' . $html->url(array('action' => 'harvest_projects_tasks', 'ext' => 'json')) . '", data, function(j) {
+			$.getJSON("' . $html->url(array('action' => 'harvest_projects_tasks', 'ext' => 'json', $this->data['UserBridge']['id'])) . '", data, function(j) {
 				$("#HarvestHarvestProject").addOption(j.projects);
-				$("#HarvestTask").addOption(j.tasks);
+				$("#HarvestHarvestTask").addOption(j.tasks);
 			});
 		}
 	', array('inline' => false));
@@ -56,7 +57,7 @@
 <?php echo $advform->input('Harvest.email'); ?>
 <?php echo $advform->input('Harvest.password'); ?>
 <?php echo $advform->input('Harvest.harvest_project', array('after' => $html->link('Refresh', '#', array('id' => 'refreshHarvest', 'class' => 'refresh')))); ?>
-<?php echo $advform->input('Harvest.task', array('after' => $html->link('Refresh', '#', array('id' => 'refreshHarvest2', 'class' => 'refresh')))); ?>
+<?php echo $advform->input('Harvest.harvest_task', array('after' => $html->link('Refresh', '#', array('id' => 'refreshHarvest2', 'class' => 'refresh')))); ?>
 
 <div class="submit">
 	<?php echo $advform->submit('Submit', array('div' => false)); ?>
